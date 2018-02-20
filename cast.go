@@ -11,7 +11,11 @@ var (
 	errPtrPtrStructRequired = errors.New("pointer to pointer of go structure required")
 )
 
-// UnsageCastStruct casts a byte slice its contents into an arbitrary go-structure.
+type emptyIfc struct {
+	typ, ptr unsafe.Pointer
+}
+
+// UnsafeCastStruct casts a byte slice its contents into an arbitrary go-structure.
 // The structure passed must be a pointer to a pointer of a struct to be casted too.
 //
 // If the input buffers length is 0, `to` will be set to nil.
@@ -19,9 +23,7 @@ var (
 // The operation is unsafe, as it does not validate the input value to be a
 // pointer of a pointer, plus no length check is executed.
 func UnsafeCastStruct(to interface{}, b []byte) {
-	ifc := (*struct {
-		typ, ptr unsafe.Pointer
-	})(unsafe.Pointer(&to))
+	ifc := (*emptyIfc)(unsafe.Pointer(&to))
 
 	if len(b) != 0 {
 		*(*uintptr)(ifc.ptr) = uintptr(unsafe.Pointer(&b[0]))
